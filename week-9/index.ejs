@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Dashboard</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px 15px;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .main-box {
+            max-width: 750px;
+            margin: auto;
+        }
+
+        .heading {
+            background: #334155;
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .heading h1 {
+            margin: 0 0 8px;
+        }
+
+        .heading p {
+            margin: 0;
+        }
+
+        .section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .section h2 {
+            margin-top: 0;
+            color: #334155;
+        }
+
+        .student-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .student-form input {
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            font-size: 15px;
+        }
+
+        .student-form input:focus {
+            outline: none;
+            border-color: #475569;
+        }
+
+        .add-button {
+            padding: 12px;
+            border: none;
+            border-radius: 7px;
+            background: #334155;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .add-button:hover {
+            background: #1e293b;
+        }
+
+        .student-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+
+        .details h3 {
+            margin: 0 0 6px;
+            color: #334155;
+        }
+
+        .details p {
+            margin: 4px 0;
+            color: #64748b;
+        }
+
+        .delete-button {
+            border: none;
+            padding: 9px 14px;
+            border-radius: 6px;
+            background: #dc2626;
+            color: white;
+            cursor: pointer;
+        }
+
+        .delete-button:hover {
+            background: #b91c1c;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #64748b;
+            padding: 15px;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+    <div class="main-box">
+
+        <div class="heading">
+            <h1>Student Management System</h1>
+            <p>RESTful API Student Portal</p>
+        </div>
+
+
+        <!-- ADD STUDENT -->
+
+        <div class="section">
+
+            <h2>Register Student</h2>
+
+            <form id="studentForm" class="student-form">
+
+                <input
+                    type="text"
+                    id="studentName"
+                    placeholder="Student Name"
+                    required
+                >
+
+                <input
+                    type="text"
+                    id="rollNumber"
+                    placeholder="Roll Number"
+                    required
+                >
+
+                <input
+                    type="text"
+                    id="department"
+                    placeholder="Department"
+                    required
+                >
+
+                <input
+                    type="number"
+                    id="marks"
+                    placeholder="Marks"
+                    required
+                >
+
+                <button
+                    type="submit"
+                    class="add-button">
+
+                    Register Student
+
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- STUDENT RECORDS -->
+
+        <div class="section">
+
+            <h2>Student Records</h2>
+
+            <div id="studentList">
+
+                <% if (students.length === 0) { %>
+
+                    <div class="no-data">
+                        No student records available.
+                    </div>
+
+                <% } %>
+
+
+                <% students.forEach(function(student) { %>
+
+                    <div
+                        class="student-item"
+                        id="student-<%= student._id %>"
+                    >
+
+                        <div class="details">
+
+                            <h3>
+                                <%= student.studentName %>
+                            </h3>
+
+                            <p>
+                                Roll Number:
+                                <%= student.rollNumber %>
+                            </p>
+
+                            <p>
+                                Department:
+                                <%= student.department %>
+                            </p>
+
+                            <p>
+                                Marks:
+                                <%= student.marks %>
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            class="delete-button"
+                            onclick="deleteStudent('<%= student._id %>')">
+
+                            Delete
+
+                        </button>
+
+                    </div>
+
+                <% }); %>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        // CREATE OPERATION
+
+        const form = document.getElementById("studentForm");
+
+        form.addEventListener("submit", async function(event) {
+
+            event.preventDefault();
+
+
+            const student = {
+
+                studentName:
+                    document.getElementById("studentName").value,
+
+                rollNumber:
+                    document.getElementById("rollNumber").value,
+
+                department:
+                    document.getElementById("department").value,
+
+                marks:
+                    Number(document.getElementById("marks").value)
+
+            };
+
+
+            try {
+
+                const result = await fetch("/students", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify(student)
+
+                });
+
+
+                const responseData = await result.json();
+
+
+                if (result.ok) {
+
+                    alert(responseData.message);
+
+                    form.reset();
+
+                    window.location.reload();
+
+                } else {
+
+                    alert(responseData.message);
+
+                }
+
+            } catch (error) {
+
+                alert("Unable to connect to server");
+
+            }
+
+        });
